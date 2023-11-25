@@ -1,7 +1,6 @@
 mod utils;
 
-use std::fmt::Display;
-
+use fixedbitset::FixedBitSet;
 use wasm_bindgen::prelude::*;
 
 const WIDTH: u32 = 64;
@@ -19,18 +18,21 @@ pub enum Cell {
 pub struct Universe {
     width: u32,
     height: u32,
-    cells: Vec<Cell>,
+    cells: FixedBitSet,
 }
 
 impl Universe {
     fn new_with<F>(f: F) -> Self
     where
-        F: FnMut(u32) -> Cell,
+        F: FnMut(&usize) -> bool,
     {
         let width = WIDTH;
         let height = HEIGHT;
 
-        let cells = (0..width * height).map(f).collect();
+        let mut cells = FixedBitSet::with_capacity((width * height) as usize);
+        (0..cells.len()).filter(f).for_each(|idx| {
+            cells.set(idx, true);
+        });
 
         Self {
             width,
@@ -64,7 +66,7 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
-        Self::new_with(|_| Cell::Dead)
+        Self::new_with(|_| false)
     }
 
     pub fn new_default() -> Self {
@@ -78,17 +80,7 @@ impl Universe {
     }
 
     pub fn new_random() -> Self {
-        Self::new_with(|_| {
-            if js_sys::Math::random() < 0.5 {
-                Cell::Dead
-            } else {
-                Cell::Alive
-            }
-        })
-    }
-
-    pub fn render(&self) -> String {
-        self.to_string()
+        Self::new_with(|_| js_sys::Math::random() >= 0.5)
     }
 
     pub fn width(&self) -> u32 {
@@ -99,8 +91,8 @@ impl Universe {
         self.height
     }
 
-    pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr()
+    pub fn cells(&self) -> *const u32 {
+        self.cells.as_slice().as_ptr()
     }
 
     pub fn add_glider(&mut self, row: u32, col: u32) {
@@ -109,7 +101,7 @@ impl Universe {
                 let row = (row + delta_row) % self.height;
                 let col = (col + delta_col) % self.width;
                 let idx = self.get_index(row, col);
-                self.cells[idx] = Cell::Dead;
+                self.cells.set(idx, false);
             }
         }
 
@@ -123,7 +115,7 @@ impl Universe {
             let row = (row + delta_row) % self.height;
             let col = (col + delta_col) % self.width;
             let idx = self.get_index(row, col);
-            self.cells[idx] = Cell::Alive;
+            self.cells.set(idx, true);
         }
     }
 
@@ -133,15 +125,16 @@ impl Universe {
         for row in 0..self.height {
             for col in 0..self.width {
                 let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
-                let live_neighbors = self.live_neighbor_count(row, col);
+                let cell_is_alive = self.cells.contains(idx);
 
-                let next_cell = match (cell, live_neighbors) {
-                    (Cell::Dead, 3) | (Cell::Alive, 2..=3) => Cell::Alive,
-                    _ => Cell::Dead,
+                let live_neighbors = self.live_neighbor_count(row, col);
+                let cell_will_be_alive = if cell_is_alive {
+                    live_neighbors == 2 || live_neighbors == 3
+                } else {
+                    live_neighbors == 3
                 };
 
-                next[idx] = next_cell;
+                next.set(idx, cell_will_be_alive);
             }
         }
 
@@ -149,30 +142,8 @@ impl Universe {
     }
 }
 
-impl Display for Universe {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for line in self.cells.as_slice().chunks(self.width as usize) {
-            for &cell in line {
-                let symbol = match cell {
-                    Cell::Dead => "◻",
-                    Cell::Alive => "◼",
-                };
-                write!(f, "{symbol}")?;
-            }
-            writeln!(f)?;
-        }
-        Ok(())
-    }
-}
-
 impl Default for Universe {
     fn default() -> Self {
-        Self::new_with(|i| {
-            if i % 2 == 0 || i % 7 == 0 {
-                Cell::Alive
-            } else {
-                Cell::Dead
-            }
-        })
+        Self::new_with(|i| i % 2 == 0 || i % 7 == 0)
     }
 }
