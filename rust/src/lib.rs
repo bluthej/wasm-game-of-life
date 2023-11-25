@@ -4,6 +4,9 @@ use std::fmt::Display;
 
 use wasm_bindgen::prelude::*;
 
+const WIDTH: u32 = 64;
+const HEIGHT: u32 = 64;
+
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -26,8 +29,8 @@ impl Universe {
 
     fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
         let mut count = 0;
-        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
-            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
+        for delta_row in [self.height - 1, 0, 1] {
+            for delta_col in [self.width - 1, 0, 1] {
                 if delta_row == 0 && delta_col == 0 {
                     continue;
                 }
@@ -45,7 +48,26 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
+        let width = WIDTH;
+        let height = HEIGHT;
+
+        let cells = vec![Cell::Dead; (width * height) as usize];
+
+        Self {
+            width,
+            height,
+            cells,
+        }
+    }
+
+    pub fn new_default() -> Self {
         Self::default()
+    }
+
+    pub fn new_with_glider() -> Self {
+        let mut universe = Self::new();
+        universe.add_glider(universe.height / 2, universe.width / 2);
+        universe
     }
 
     pub fn render(&self) -> String {
@@ -62,6 +84,30 @@ impl Universe {
 
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
+    }
+
+    pub fn add_glider(&mut self, row: u32, col: u32) {
+        for delta_row in [self.height - 2, self.height - 1, 0, 1, 2] {
+            for delta_col in [self.width - 2, self.width - 1, 0, 1, 2] {
+                let row = (row + delta_row) % self.height;
+                let col = (col + delta_col) % self.width;
+                let idx = self.get_index(row, col);
+                self.cells[idx] = Cell::Dead;
+            }
+        }
+
+        for (delta_row, delta_col) in [
+            (self.height - 1, 1),
+            (0, self.width - 1),
+            (0, 1),
+            (1, 0),
+            (1, 1),
+        ] {
+            let row = (row + delta_row) % self.height;
+            let col = (col + delta_col) % self.width;
+            let idx = self.get_index(row, col);
+            self.cells[idx] = Cell::Alive;
+        }
     }
 
     pub fn tick(&mut self) {
@@ -104,8 +150,8 @@ impl Display for Universe {
 
 impl Default for Universe {
     fn default() -> Self {
-        let width = 64;
-        let height = 64;
+        let width = WIDTH;
+        let height = HEIGHT;
 
         let cells = (0..width * height)
             .map(|i| {
