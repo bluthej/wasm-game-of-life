@@ -23,6 +23,22 @@ pub struct Universe {
 }
 
 impl Universe {
+    fn new_with<F>(f: F) -> Self
+    where
+        F: FnMut(u32) -> Cell,
+    {
+        let width = WIDTH;
+        let height = HEIGHT;
+
+        let cells = (0..width * height).map(f).collect();
+
+        Self {
+            width,
+            height,
+            cells,
+        }
+    }
+
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
     }
@@ -48,16 +64,7 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
-        let width = WIDTH;
-        let height = HEIGHT;
-
-        let cells = vec![Cell::Dead; (width * height) as usize];
-
-        Self {
-            width,
-            height,
-            cells,
-        }
+        Self::new_with(|_| Cell::Dead)
     }
 
     pub fn new_default() -> Self {
@@ -68,6 +75,16 @@ impl Universe {
         let mut universe = Self::new();
         universe.add_glider(universe.height / 2, universe.width / 2);
         universe
+    }
+
+    pub fn new_random() -> Self {
+        Self::new_with(|_| {
+            if js_sys::Math::random() < 0.5 {
+                Cell::Dead
+            } else {
+                Cell::Alive
+            }
+        })
     }
 
     pub fn render(&self) -> String {
@@ -150,23 +167,12 @@ impl Display for Universe {
 
 impl Default for Universe {
     fn default() -> Self {
-        let width = WIDTH;
-        let height = HEIGHT;
-
-        let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
-
-        Self {
-            width,
-            height,
-            cells,
-        }
+        Self::new_with(|i| {
+            if i % 2 == 0 || i % 7 == 0 {
+                Cell::Alive
+            } else {
+                Cell::Dead
+            }
+        })
     }
 }
