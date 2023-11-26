@@ -119,11 +119,11 @@ impl Universe {
         self.cells = FixedBitSet::with_capacity((self.width * height) as usize);
     }
 
-    pub fn add_glider(&mut self, row: u32, col: u32) {
+    pub fn add_glider(&mut self, row: u32, column: u32) {
         for delta_row in [self.height - 2, self.height - 1, 0, 1, 2] {
             for delta_col in [self.width - 2, self.width - 1, 0, 1, 2] {
                 let row = (row + delta_row) % self.height;
-                let col = (col + delta_col) % self.width;
+                let col = (column + delta_col) % self.width;
                 let idx = self.get_index(row, col);
                 self.cells.set(idx, false);
             }

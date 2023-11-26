@@ -62,14 +62,14 @@ const drawGrid = () => {
 
   // Vertical lines
   for (let i = 0; i <= width; i++) {
-    ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-    ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
+    ctx.moveTo(i * (CELL_SIZE + CELL_BORDER) + CELL_BORDER, 0);
+    ctx.lineTo(i * (CELL_SIZE + CELL_BORDER) + CELL_BORDER, (CELL_SIZE + CELL_BORDER) * height + CELL_BORDER);
   }
 
   // Horizontal lines
   for (let j = 0; j <= height; j++) {
-    ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);
-    ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
+    ctx.moveTo(0, j * (CELL_SIZE + CELL_BORDER) + CELL_BORDER);
+    ctx.lineTo((CELL_SIZE + CELL_BORDER) * width + CELL_BORDER, j * (CELL_SIZE + CELL_BORDER) + CELL_BORDER);
   }
 
   ctx.stroke();
@@ -100,8 +100,8 @@ const drawCells = () => {
         : DEAD_COLOR;
 
       ctx.fillRect(
-        col * (CELL_SIZE + 1) + 1,
-        row * (CELL_SIZE + 1) + 1,
+        col * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
+        row * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
         CELL_SIZE,
         CELL_SIZE
       );
