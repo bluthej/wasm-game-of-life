@@ -91,6 +91,12 @@ impl Universe {
         Self::new_with(|_| js_sys::Math::random() >= 0.5)
     }
 
+    pub fn reset(&mut self) {
+        (0..self.cells.len()).for_each(|idx| {
+            self.cells.set(idx, js_sys::Math::random() >= 0.5);
+        });
+    }
+
     pub fn width(&self) -> u32 {
         self.width
     }

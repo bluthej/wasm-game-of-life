@@ -47,6 +47,14 @@ playPauseButton.addEventListener("click", event => {
   }
 });
 
+const resetButton = document.getElementById("reset");
+
+resetButton.textContent = "🔄";
+
+resetButton.addEventListener("click", event => {
+  universe.reset();
+});
+
 // Add click events
 canvas.addEventListener("click", event => {
   const boundingRect = canvas.getBoundingClientRect();
