@@ -19,6 +19,7 @@ canvas.width = (CELL_SIZE + CELL_BORDER) * width + CELL_BORDER;
 
 const ctx = canvas.getContext('2d');
 
+// Play/pause logic
 let animationId = null;
 
 const isPaused = () => {
@@ -44,6 +45,25 @@ playPauseButton.addEventListener("click", event => {
   } else {
     pause();
   }
+});
+
+// Add click events
+canvas.addEventListener("click", event => {
+  const boundingRect = canvas.getBoundingClientRect();
+
+  const scaleX = canvas.width / boundingRect.width;
+  const scaleY = canvas.height / boundingRect.height;
+
+  const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
+  const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+
+  const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + CELL_BORDER)), height - CELL_BORDER);
+  const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + CELL_BORDER)), width - CELL_BORDER);
+
+  universe.toggle_cell(row, col);
+
+  drawGrid();
+  drawCells();
 });
 
 const renderLoop = () => {
