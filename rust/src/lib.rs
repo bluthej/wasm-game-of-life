@@ -72,6 +72,8 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
+        utils::set_panic_hook();
+
         Self::new_with(|_| false)
     }
 
@@ -145,11 +147,25 @@ impl Universe {
                 let cell_is_alive = self.cells.contains(idx);
 
                 let live_neighbors = self.live_neighbor_count(row, col);
+
+                // log!(
+                //     "cell[{}, {}] is initially {} and has {} live neighbors",
+                //     row,
+                //     col,
+                //     if cell_is_alive { "alive" } else { "dead" },
+                //     live_neighbors
+                // );
+
                 let cell_will_be_alive = if cell_is_alive {
                     live_neighbors == 2 || live_neighbors == 3
                 } else {
                     live_neighbors == 3
                 };
+
+                // log!(
+                //     "    it becomes {}",
+                //     if cell_will_be_alive { "alive" } else { "dead" }
+                // );
 
                 next.set(idx, cell_will_be_alive);
             }
