@@ -68,7 +68,12 @@ canvas.addEventListener("click", event => {
   const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + CELL_BORDER)), height - CELL_BORDER);
   const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + CELL_BORDER)), width - CELL_BORDER);
 
-  universe.toggle_cell(row, col);
+  // TODO: add `event.shiftKey` to insert a pulsar
+  if (event.ctrlKey) {
+    universe.add_glider(row, col);
+  } else {
+    universe.toggle_cell(row, col);
+  }
 
   drawGrid();
   drawCells();

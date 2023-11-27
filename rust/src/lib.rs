@@ -136,11 +136,11 @@ impl Universe {
         }
 
         self.set_cells(&[
-            (self.height - 1, 1),
-            (0, self.width - 1),
-            (0, 1),
-            (1, 0),
-            (1, 1),
+            ((row + self.height - 1) % self.height, column + 1),
+            (row, (column + self.width - 1) % self.width),
+            (row, column + 1),
+            (row + 1, column),
+            (row + 1, column + 1),
         ]);
     }
 
