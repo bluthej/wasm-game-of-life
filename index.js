@@ -74,9 +74,16 @@ canvas.addEventListener("click", event => {
   drawCells();
 });
 
+const ticks_per_frame = document.querySelector("#ticks-per-frame");
+ticks_per_frame.addEventListener("input", (event) => {
+  ticks_per_frame.value = event.target.value;
+});
+
 const renderLoop = () => {
   // debugger;
-  universe.tick();
+  for (let i = 0; i < ticks_per_frame.value; i++) {
+    universe.tick();
+  }
 
   drawGrid();
   drawCells();
