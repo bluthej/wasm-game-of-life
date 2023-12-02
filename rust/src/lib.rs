@@ -126,21 +126,23 @@ impl Universe {
     }
 
     pub fn add_glider(&mut self, row: u32, column: u32) {
-        for delta_row in [self.height - 2, self.height - 1, 0, 1, 2] {
-            for delta_col in [self.width - 2, self.width - 1, 0, 1, 2] {
-                let row = (row + delta_row) % self.height;
-                let col = (column + delta_col) % self.width;
+        let height = self.height;
+        let width = self.width;
+        for delta_row in (1..=2).rev().map(|i| height - i).chain(0..=2) {
+            for delta_col in (1..=2).rev().map(|i| width - i).chain(0..=2) {
+                let row = (row + delta_row) % height;
+                let col = (column + delta_col) % width;
                 let idx = self.get_index(row, col);
                 self.cells.set(idx, false);
             }
         }
 
         self.set_cells(&[
-            ((row + self.height - 1) % self.height, column + 1),
-            (row, (column + self.width - 1) % self.width),
-            (row, column + 1),
-            (row + 1, column),
-            (row + 1, column + 1),
+            ((row + height - 1) % height, (column + 1) % width),
+            (row, (column + width - 1) % width),
+            (row, (column + 1) % width),
+            ((row + 1) % height, column),
+            ((row + 1) % height, (column + 1) % width),
         ]);
     }
 

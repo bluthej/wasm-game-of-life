@@ -65,8 +65,8 @@ canvas.addEventListener("click", event => {
   const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
   const canvasTop = (event.clientY - boundingRect.top) * scaleY;
 
-  const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + CELL_BORDER)), height - CELL_BORDER);
-  const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + CELL_BORDER)), width - CELL_BORDER);
+  const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + CELL_BORDER)), height - 1);
+  const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + CELL_BORDER)), width - 1);
 
   // TODO: add `event.shiftKey` to insert a pulsar
   if (event.ctrlKey) {
