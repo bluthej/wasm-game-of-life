@@ -146,6 +146,71 @@ impl Universe {
         ]);
     }
 
+    pub fn add_pulsar(&mut self, row: u32, column: u32) {
+        let height = self.height;
+        let width = self.width;
+        for delta_row in (1..=7).rev().map(|i| height - i).chain(0..=7) {
+            for delta_col in (1..=7).rev().map(|i| width - i).chain(0..=7) {
+                let row = (row + delta_row) % height;
+                let col = (column + delta_col) % width;
+                let idx = self.get_index(row, col);
+                self.cells.set(idx, false);
+            }
+        }
+
+        self.set_cells(&[
+            ((row + height - 6) % height, (column + width - 4) % width),
+            ((row + height - 6) % height, (column + width - 3) % width),
+            ((row + height - 6) % height, (column + width - 2) % width),
+            ((row + height - 6) % height, (column + 2) % width),
+            ((row + height - 6) % height, (column + 3) % width),
+            ((row + height - 6) % height, (column + 4) % width),
+            ((row + height - 4) % height, (column + width - 6) % width),
+            ((row + height - 4) % height, (column + width - 1) % width),
+            ((row + height - 4) % height, (column + 1) % width),
+            ((row + height - 4) % height, (column + 6) % width),
+            ((row + height - 3) % height, (column + width - 6) % width),
+            ((row + height - 3) % height, (column + width - 1) % width),
+            ((row + height - 3) % height, (column + 1) % width),
+            ((row + height - 3) % height, (column + 6) % width),
+            ((row + height - 2) % height, (column + width - 6) % width),
+            ((row + height - 2) % height, (column + width - 1) % width),
+            ((row + height - 2) % height, (column + 1) % width),
+            ((row + height - 2) % height, (column + 6) % width),
+            ((row + height - 1) % height, (column + width - 4) % width),
+            ((row + height - 1) % height, (column + width - 3) % width),
+            ((row + height - 1) % height, (column + width - 2) % width),
+            ((row + height - 1) % height, (column + 2) % width),
+            ((row + height - 1) % height, (column + 3) % width),
+            ((row + height - 1) % height, (column + 4) % width),
+            //
+            ((row + 1) % height, (column + width - 4) % width),
+            ((row + 1) % height, (column + width - 3) % width),
+            ((row + 1) % height, (column + width - 2) % width),
+            ((row + 1) % height, (column + 2) % width),
+            ((row + 1) % height, (column + 3) % width),
+            ((row + 1) % height, (column + 4) % width),
+            ((row + 2) % height, (column + width - 6) % width),
+            ((row + 2) % height, (column + width - 1) % width),
+            ((row + 2) % height, (column + 1) % width),
+            ((row + 2) % height, (column + 6) % width),
+            ((row + 3) % height, (column + width - 6) % width),
+            ((row + 3) % height, (column + width - 1) % width),
+            ((row + 3) % height, (column + 1) % width),
+            ((row + 3) % height, (column + 6) % width),
+            ((row + 4) % height, (column + width - 6) % width),
+            ((row + 4) % height, (column + width - 1) % width),
+            ((row + 4) % height, (column + 1) % width),
+            ((row + 4) % height, (column + 6) % width),
+            ((row + 6) % height, (column + width - 4) % width),
+            ((row + 6) % height, (column + width - 3) % width),
+            ((row + 6) % height, (column + width - 2) % width),
+            ((row + 6) % height, (column + 2) % width),
+            ((row + 6) % height, (column + 3) % width),
+            ((row + 6) % height, (column + 4) % width),
+        ]);
+    }
+
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
 
