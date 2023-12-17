@@ -1,8 +1,8 @@
 import { Universe } from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
-const CELL_SIZE = 10; // px
-const CELL_BORDER = 2; // px
+const CELL_SIZE = 5; // px
+const CELL_BORDER = 1; // px
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
@@ -178,13 +178,32 @@ const drawCells = () => {
 
   ctx.beginPath();
 
+  // Alive cells
+  ctx.fillStyle = ALIVE_COLOR;
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const idx = getIndex(row, col);
+      if (!bitIsSet(idx, cells)) {
+        continue;
+      }
 
-      ctx.fillStyle = bitIsSet(idx, cells)
-        ? ALIVE_COLOR
-        : DEAD_COLOR;
+      ctx.fillRect(
+        col * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
+        row * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+
+  // Dead cells
+  ctx.fillStyle = DEAD_COLOR;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const idx = getIndex(row, col);
+      if (bitIsSet(idx, cells)) {
+        continue;
+      }
 
       ctx.fillRect(
         col * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,

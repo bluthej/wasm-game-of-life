@@ -4,8 +4,8 @@ use fixedbitset::FixedBitSet;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
-const WIDTH: u32 = 64;
-const HEIGHT: u32 = 64;
+const WIDTH: u32 = 128;
+const HEIGHT: u32 = 128;
 
 pub struct Timer<'a> {
     name: &'a str,
@@ -69,20 +69,28 @@ impl Universe {
         }
     }
 
-    fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
+    fn live_neighbor_count(&self, row: u32, col: u32) -> u8 {
         let mut count = 0;
-        for delta_row in [self.height - 1, 0, 1] {
-            for delta_col in [self.width - 1, 0, 1] {
-                if delta_row == 0 && delta_col == 0 {
-                    continue;
-                }
 
-                let neighbor_row = (row + delta_row) % self.height;
-                let neighbor_col = (column + delta_col) % self.width;
-                let idx = self.get_index(neighbor_row, neighbor_col);
-                count += self.cells[idx] as u8;
-            }
+        let north = if row == 0 { self.height - 1 } else { row - 1 };
+        let south = if row == self.height { 0 } else { row + 1 };
+        let west = if col == 0 { self.width - 1 } else { col - 1 };
+        let east = if col == self.width { 0 } else { col + 1 };
+
+        for (r, c) in [
+            (north, west),
+            (north, col),
+            (north, east),
+            (row, east),
+            (south, east),
+            (south, col),
+            (south, west),
+            (row, west),
+        ] {
+            let idx = self.get_index(r, c);
+            count += self.cells[idx] as u8;
         }
+
         count
     }
 }
@@ -232,38 +240,45 @@ impl Universe {
     pub fn tick(&mut self) {
         let _timer = Timer::new("Universe::tick");
 
-        let mut next = self.cells.clone();
+        let mut next = {
+            let _timer = Timer::new("allocate next cells");
+            self.cells.clone()
+        };
 
-        for row in 0..self.height {
-            for col in 0..self.width {
-                let idx = self.get_index(row, col);
-                let cell_is_alive = self.cells.contains(idx);
+        {
+            let _timer = Timer::new("new generation");
+            for row in 0..self.height {
+                for col in 0..self.width {
+                    let idx = self.get_index(row, col);
+                    let cell_is_alive = self.cells.contains(idx);
 
-                let live_neighbors = self.live_neighbor_count(row, col);
+                    let live_neighbors = self.live_neighbor_count(row, col);
 
-                // log!(
-                //     "cell[{}, {}] is initially {} and has {} live neighbors",
-                //     row,
-                //     col,
-                //     if cell_is_alive { "alive" } else { "dead" },
-                //     live_neighbors
-                // );
+                    // log!(
+                    //     "cell[{}, {}] is initially {} and has {} live neighbors",
+                    //     row,
+                    //     col,
+                    //     if cell_is_alive { "alive" } else { "dead" },
+                    //     live_neighbors
+                    // );
 
-                let cell_will_be_alive = if cell_is_alive {
-                    live_neighbors == 2 || live_neighbors == 3
-                } else {
-                    live_neighbors == 3
-                };
+                    let cell_will_be_alive = if cell_is_alive {
+                        live_neighbors == 2 || live_neighbors == 3
+                    } else {
+                        live_neighbors == 3
+                    };
 
-                // log!(
-                //     "    it becomes {}",
-                //     if cell_will_be_alive { "alive" } else { "dead" }
-                // );
+                    // log!(
+                    //     "    it becomes {}",
+                    //     if cell_will_be_alive { "alive" } else { "dead" }
+                    // );
 
-                next.set(idx, cell_will_be_alive);
+                    next.set(idx, cell_will_be_alive);
+                }
             }
         }
 
+        let _timer = Timer::new("free old cells");
         self.cells = next;
     }
 
